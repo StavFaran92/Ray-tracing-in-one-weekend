@@ -2,9 +2,10 @@ cmake_minimum_required(VERSION 3.21.2)
 
 project(ray-tracing-in-one-weekend VERSION 1.0)
 
-add_executable(${PROJECT_NAME} main.cpp stbi_wrapper.cpp stbi_wrapper.h)
+add_executable(${PROJECT_NAME} main.cpp ImageUtils.cpp ImageUtils.h Ray.cpp. Ray.h Color.h Color.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC extern/stb)
+target_include_directories(${PROJECT_NAME} PUBLIC extern/glm)
 
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
