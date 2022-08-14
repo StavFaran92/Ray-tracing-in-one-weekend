@@ -7,19 +7,27 @@
 
 #define CHANNEL_NUM 3
 
-bool hitSphere(const glm::vec3& center, float radius, const Ray& ray)
+double hitSphere(const glm::vec3& center, float radius, const Ray& ray)
 {
     glm::vec3 oc = ray.origin() - center;
     auto a = glm::dot(ray.direction(), ray.direction());
-    auto b = 2.f * glm::dot(ray.direction(), oc);
+    auto b_half = glm::dot(ray.direction(), oc);
     auto c = glm::dot(oc, oc) - radius * radius;
-    return (b * b - 4 * a * c) > 0;
+    float discriminant = b_half * b_half - a * c;
+    if (discriminant < 0)
+        return -1;
+    else
+        return (-b_half - glm::sqrt(discriminant)) / a;
 
 }
 
 Color rayColor(const Ray& r) {
-    if (hitSphere(glm::vec3(0, 0, -1), 0.5, r))
-        return Color(1,0,0);
+    auto hitScale = hitSphere(glm::vec3(0, 0, -1), 0.5, r);
+    if (hitScale > 0)
+    {
+        glm::vec3 normal = r.at(hitScale) - glm::vec3(0, 0, -1);
+        return .5f * Color(normal.x + 1, normal.y + 1, normal.z + 1);
+    }
     glm::vec3 unit_direction = r.direction();
     float t = 0.5f * (unit_direction.y + 1.0);
     return Color(1.0, 1.0, 1.0) * (1.0f - t) + Color(0.5, 0.7, 1.0) * t;
