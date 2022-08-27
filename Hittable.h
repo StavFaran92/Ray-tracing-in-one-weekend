@@ -2,9 +2,16 @@
 #include "Ray.h"
 
 struct HitRecord {
-    glm::vec3 p;
+    glm::vec3 point;
     glm::vec3 normal;
     double t;
+    bool isFrontFace;
+
+    inline void setFaceNormal(const Ray& r, const glm::vec3& outwardNormal)
+    {
+        isFrontFace = glm::dot(r.direction(), outwardNormal) < 0;
+        normal = isFrontFace ? outwardNormal : -outwardNormal;
+    }
 };
 
 class Hittable {

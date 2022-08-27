@@ -2,7 +2,20 @@ cmake_minimum_required(VERSION 3.21.2)
 
 project(ray-tracing-in-one-weekend VERSION 1.0)
 
-add_executable(${PROJECT_NAME} main.cpp ImageUtils.cpp ImageUtils.h Ray.cpp. Ray.h Color.h Color.cpp Hittable.h Sphere.h Sphere.cpp)
+add_executable(${PROJECT_NAME} 
+	main.cpp 
+	ImageUtils.cpp 
+	ImageUtils.h 
+	Ray.cpp. 
+	Ray.h 
+	Color.h 
+	Color.cpp 
+	Hittable.h 
+	Sphere.h 
+	Sphere.cpp
+	HittableList.h
+	HittableList.cpp
+	Constants.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC extern/stb)
 target_include_directories(${PROJECT_NAME} PUBLIC extern/glm)
