@@ -27,19 +27,20 @@ double hitSphere(const glm::vec3& center, float radius, const Ray& ray)
 
 }
 
-Color rayColor(const Ray& r, const Hittable& world) {
-    HitRecord rec;
-    if (world.hit(r, 0, infinity, rec))
+Color rayColor(const Ray& r, const Hittable& world, int depth) {
+    if (depth <= 0)
     {
-        auto a = Color(rec.normal.x + 1, rec.normal.y + 1, rec.normal.z + 1);
-        return .5f * Color(rec.normal.x + 1, rec.normal.y + 1, rec.normal.z + 1);
+        return Color(0,0,0);
     }
-    //auto hitScale = hitSphere(glm::vec3(0, 0, -1), 0.5, r);
-    //if (hitScale > 0)
-    //{
-    //    glm::vec3 normal = r.at(hitScale) - glm::vec3(0, 0, -1);
-    //    return .5f * Color(normal.x + 1, normal.y + 1, normal.z + 1);
-    //}
+
+    HitRecord rec;
+
+    // We use 0.001 to avoid "Shadow Acne"
+    if (world.hit(r, 0.001, infinity, rec))
+    {
+        glm::vec3 target = rec.point + rec.normal + getUnitSphereRandomVec();
+        return .5f * rayColor(Ray(rec.point, target - rec.point), world, depth - 1);
+    }
     glm::vec3 unit_direction = r.direction();
     float t = 0.5f * (unit_direction.y + 1.0);
     return Color(1.0, 1.0, 1.0) * (1.0f - t) + Color(0.5, 0.7, 1.0) * t;
@@ -54,6 +55,7 @@ int main() {
     const int image_width = 400;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
     const int numOfSamples = 100;
+    const int maxDepth = 20;
 
     uint8_t* pixels = new uint8_t[image_width * image_height * CHANNEL_NUM];
 
@@ -77,11 +79,13 @@ int main() {
                 auto u = float(i + randomDouble()) / (image_width - 1);
                 auto v = float(j + randomDouble()) / (image_height - 1);
                 Ray& ray = cam.getRay(u, v);
-                auto& color = rayColor(ray, world);
+                auto& color = rayColor(ray, world, maxDepth);
 
                 blender.add(color);
             }
             Color& color = blender.get();
+
+            color.applyGammaCorrection(2.0f);
 
             unsigned char r = 0;
             unsigned char g = 0;

@@ -2,6 +2,8 @@
 
 
 #include <cstdlib>
+#include <glm/glm.hpp>
+#include "Constants.h"
 
 inline double randomDouble() {
     // Returns a random real in [0,1).
@@ -19,4 +21,16 @@ inline T clamp(T x, T min, T max)
     if (x < min) return min;
     if (x > max) return max;
     return x;
+}
+
+inline glm::vec3 getUnitSphereRandomVec()
+{
+    while (true)
+    {
+        glm::vec3 v(randomDouble(-1,1), randomDouble(-1, 1), randomDouble(-1, 1));
+        if (glm::length(v) >= 1)
+            continue;
+        return v;
+
+    }
 }

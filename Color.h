@@ -56,6 +56,8 @@ public:
 
 	void getAsUnsignedChar(unsigned char& r, unsigned char& g, unsigned char& b) const;
 
+	void applyGammaCorrection(float factor);
+
 private:
 	float m_r = 0;
 	float m_g = 0;
