@@ -15,7 +15,12 @@ add_executable(${PROJECT_NAME}
 	Sphere.cpp
 	HittableList.h
 	HittableList.cpp
-	Constants.h)
+	Constants.h
+	Utils.h
+	Camera.h
+	Camera.cpp
+	Blend.h
+	Blend.cpp)
 
 target_include_directories(${PROJECT_NAME} PUBLIC extern/stb)
 target_include_directories(${PROJECT_NAME} PUBLIC extern/glm)

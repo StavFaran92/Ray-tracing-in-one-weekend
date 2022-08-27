@@ -7,6 +7,9 @@
 #include "HittableList.h"
 #include "Constants.h"
 #include "Sphere.h"
+#include "Camera.h"
+#include "Utils.h"
+#include "Blend.h"
 
 #define CHANNEL_NUM 3
 
@@ -50,25 +53,17 @@ int main() {
     const auto aspect_ratio = 16.0 / 9.0;
     const int image_width = 400;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
+    const int numOfSamples = 100;
 
     uint8_t* pixels = new uint8_t[image_width * image_height * CHANNEL_NUM];
 
     // World
     HittableList world;
     world.add(std::make_shared<Sphere>(glm::vec3{ 0,0,-1 }, 0.5));
-    world.add(std::make_shared<Sphere>(glm::vec3{ 0,-100,-20 }, 100));
+    world.add(std::make_shared<Sphere>(glm::vec3{ 0,-100.5,-1 }, 100));
 
     // Camera
-
-    auto viewport_height = 2.0;
-    auto viewport_width = aspect_ratio * viewport_height;
-    auto focal_length = 1.0;
-
-    auto origin = glm::vec3(0, 0, 0);
-    auto horizontal = glm::vec3(viewport_width, 0, 0);
-    auto vertical = glm::vec3(0, viewport_height, 0);
-    auto lower_left_corner = origin - horizontal / 2.f - vertical / 2.f - glm::vec3(0, 0, focal_length);
-    
+    Camera cam;    
 
     // Render
 
@@ -76,18 +71,26 @@ int main() {
     for (int j = image_height - 1; j >= 0; --j) {
         std::cout << "\rScanlines remaining: " << j << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
-            auto u = float(i) / (image_width - 1);
-            auto v = float(j) / (image_height - 1);
-            Ray r(origin, lower_left_corner + u * horizontal + v * vertical - origin);
-            auto color = rayColor(r, world);
+            Blend blender;
+            for (int s = 0; s < numOfSamples; s++)
+            {
+                auto u = float(i + randomDouble()) / (image_width - 1);
+                auto v = float(j + randomDouble()) / (image_height - 1);
+                Ray& ray = cam.getRay(u, v);
+                auto& color = rayColor(ray, world);
 
-            auto ir = static_cast<unsigned char>(color.r() * 255.999f);
-            auto ig = static_cast<unsigned char>(255.999 * color.g());
-            auto ib = static_cast<unsigned char>(255.999 * color.b());
+                blender.add(color);
+            }
+            Color& color = blender.get();
 
-            pixels[++index] = ir;
-            pixels[++index] = ib;
-            pixels[++index] = ig;
+            unsigned char r = 0;
+            unsigned char g = 0;
+            unsigned char b = 0;
+            color.getAsUnsignedChar(r, g, b);
+
+            pixels[++index] = r;
+            pixels[++index] = b;
+            pixels[++index] = g;
         }
     }
 

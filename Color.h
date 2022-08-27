@@ -54,7 +54,7 @@ public:
 	float g() const { return m_g; }
 	float b() const { return m_b; }
 
-
+	void getAsUnsignedChar(unsigned char& r, unsigned char& g, unsigned char& b) const;
 
 private:
 	float m_r = 0;
