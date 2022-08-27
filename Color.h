@@ -13,6 +13,8 @@ else if(c > 1) \
 class Color
 {
 public:
+	Color() {}
+
 	Color(float r, float g, float b)
 		: m_r(r), m_g(g), m_b(b) 
 	{}
@@ -90,4 +92,16 @@ inline Color operator+(const Color& c1, const Color& c2)
 	CLAMP_COLORS(r, g, b);
 
 	return Color(r,g,b);
+}
+
+inline Color operator*(const Color& c1, const Color& c2)
+{
+	auto r = c1.r() * c2.r();
+	auto g = c1.g() * c2.g();
+	auto b = c1.b() * c2.b();
+
+
+	CLAMP_COLORS(r, g, b);
+
+	return Color(r, g, b);
 }

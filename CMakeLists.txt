@@ -20,7 +20,9 @@ add_executable(${PROJECT_NAME}
 	Camera.h
 	Camera.cpp
 	Blend.h
-	Blend.cpp)
+	Blend.cpp
+	Material.cpp
+	Material.h)
 
 target_include_directories(${PROJECT_NAME} PUBLIC extern/stb)
 target_include_directories(${PROJECT_NAME} PUBLIC extern/glm)

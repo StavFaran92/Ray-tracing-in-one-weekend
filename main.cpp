@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "Utils.h"
 #include "Blend.h"
+#include "Material.h"
 
 #define CHANNEL_NUM 3
 
@@ -38,8 +39,15 @@ Color rayColor(const Ray& r, const Hittable& world, int depth) {
     // We use 0.001 to avoid "Shadow Acne"
     if (world.hit(r, 0.001, infinity, rec))
     {
-        glm::vec3 target = rec.point + rec.normal + getUnitSphereRandomVec();
-        return .5f * rayColor(Ray(rec.point, target - rec.point), world, depth - 1);
+        //glm::vec3 target = rec.point + rec.normal + getUnitSphereRandomVec();
+        //return .5f * rayColor(Ray(rec.point, target - rec.point), world, depth - 1);
+        Ray scattered;
+        Color attenuation;
+        if (rec.material->scatter(r, rec, attenuation, scattered))
+        {
+            return attenuation * rayColor(scattered, world, depth - 1);
+        }
+        return Color(0, 0, 0);
     }
     glm::vec3 unit_direction = r.direction();
     float t = 0.5f * (unit_direction.y + 1.0);
@@ -55,14 +63,21 @@ int main() {
     const int image_width = 400;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
     const int numOfSamples = 100;
-    const int maxDepth = 20;
+    const int maxDepth = 40;
 
     uint8_t* pixels = new uint8_t[image_width * image_height * CHANNEL_NUM];
 
     // World
     HittableList world;
-    world.add(std::make_shared<Sphere>(glm::vec3{ 0,0,-1 }, 0.5));
-    world.add(std::make_shared<Sphere>(glm::vec3{ 0,-100.5,-1 }, 100));
+    auto material_ground = std::make_shared<Lambertian>(Color(0.8, 0.8, 0.0));
+    auto material_center = std::make_shared<Lambertian>(Color(0.7, 0.3, 0.3));
+    auto material_left = std::make_shared<Metal>(Color(0.8, 0.8, 0.8));
+    auto material_right = std::make_shared<Metal>(Color(0.8, 0.6, 0.2));
+
+    world.add(std::make_shared<Sphere>(glm::vec3(0.0, -100.5, -1.0), 100.0, material_ground));
+    world.add(std::make_shared<Sphere>(glm::vec3(0.0, 0.0, -1.0), 0.5, material_center));
+    world.add(std::make_shared<Sphere>(glm::vec3(-1.0, 0.0, -1.0), 0.5, material_left));
+    world.add(std::make_shared<Sphere>(glm::vec3(1.0, 0.0, -1.0), 0.5, material_right));
 
     // Camera
     Camera cam;    

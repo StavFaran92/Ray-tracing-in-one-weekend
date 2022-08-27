@@ -1,11 +1,14 @@
 #pragma once
+#include <memory>
 #include "Ray.h"
+#include "Material.h"
 
 struct HitRecord {
     glm::vec3 point;
     glm::vec3 normal;
     double t;
     bool isFrontFace;
+    std::shared_ptr<Material> material;
 
     inline void setFaceNormal(const Ray& r, const glm::vec3& outwardNormal)
     {

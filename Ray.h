@@ -4,7 +4,7 @@
 
 class Ray {
 public:
-    Ray() = delete;
+    Ray() {};
     Ray(const glm::vec3& origin, const glm::vec3& direction)
         : orig(origin), dir(direction)
     {}

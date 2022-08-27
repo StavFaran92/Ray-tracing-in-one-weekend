@@ -30,7 +30,7 @@ inline glm::vec3 getUnitSphereRandomVec()
         glm::vec3 v(randomDouble(-1,1), randomDouble(-1, 1), randomDouble(-1, 1));
         if (glm::length(v) >= 1)
             continue;
-        return v;
-
+        return glm::normalize(v);
+        
     }
 }

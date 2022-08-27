@@ -23,6 +23,7 @@ bool Sphere::hit(const Ray& r, double t_min, double t_max, HitRecord& rec) const
     rec.point = r.at(rec.t);
     glm::vec3 outwardNormal = (rec.point - m_center) / m_radius;
     rec.setFaceNormal(r, outwardNormal);
+    rec.material = m_material;
 
     return true;
 }
