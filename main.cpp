@@ -11,10 +11,16 @@
 #include "Utils.h"
 #include "Blend.h"
 #include "Material.h"
+#include "ctpl_stl.h"
+#include <future>
+#include <chrono>
 
 #define CHANNEL_NUM 3
 #define NUM_OF_SAMPLES 20
 #define MAX_DEPTH 20
+#define IMAGE_WIDTH 200
+#define IMAGE_HEIGHT 150
+#define NUM_OF_THREADS 8
 
 double hitSphere(const glm::vec3& center, float radius, const Ray& ray)
 {
@@ -56,7 +62,7 @@ Color rayColor(const Ray& r, const Hittable& world, int depth) {
     return Color(1.0, 1.0, 1.0) * (1.0f - t) + Color(0.5, 0.7, 1.0) * t;
 }
 
-HittableList random_scene() {
+HittableList randomScene() {
     HittableList world;
 
     auto ground_material = std::make_shared<Lambertian>(Color(0.5, 0.5, 0.5));
@@ -153,36 +159,51 @@ void renderPixel(int x, int y, int imageWidth, int imageHeight, const Camera& ca
 
 int main() {
 
-    
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
     // Image
-    const auto aspect_ratio = 4.f / 3;
-    const int image_width = 200;
-    const int image_height = static_cast<int>(image_width / aspect_ratio);
+    const float aspectRatio = float(IMAGE_WIDTH) / IMAGE_HEIGHT;
 
-    uint8_t* pixels = new uint8_t[image_width * image_height * CHANNEL_NUM];
+    // Allocate buffer for image
+    uint8_t* pixels = new uint8_t[IMAGE_WIDTH * IMAGE_HEIGHT * CHANNEL_NUM];
     
     // World
-    HittableList& world = random_scene();
+    HittableList& world = randomScene();
 
     // Camera
-    Camera cam(glm::vec3(6, 2, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), 90, aspect_ratio);
+    Camera cam(glm::vec3(6, 2, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0), 90, aspectRatio);
+
+    // Thread pool
+    ctpl::thread_pool p(NUM_OF_THREADS);
+    std::vector<std::future<void>> results(IMAGE_HEIGHT * IMAGE_WIDTH);
 
     // Render
-
-    uint32_t index = 0;
-    for (int j = image_height - 1; j >= 0; --j) {
-        std::cout << "\rScanlines remaining: " << j << ' ' << std::flush;
-        for (int i = 0; i < image_width; ++i) {
-
-            renderPixel(i, j, image_width, image_height, cam, world, pixels);
-            
+    for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        for (int i = 0; i < IMAGE_WIDTH; ++i) {
+            results[j * IMAGE_WIDTH + i] = p.push([&, i, j](int) {renderPixel(i, j, IMAGE_WIDTH, IMAGE_HEIGHT, cam, world, pixels); });
         }
     }
 
-    ImageUtils::writeImage("test_image.png", image_width, image_height, pixels);
+    // Sync threads
+    for (int j = 0; j < results.size(); ++j) {
+        results[j].get();
+        int progress = float(j) / results.size() * 100;
+        if(progress % 10 == 0)
+            std::cout << "\rProgress: " << progress << "%" << std::flush;
+    }
 
+    // Write to image
+    ImageUtils::writeImage("test_image.png", IMAGE_WIDTH, IMAGE_HEIGHT, pixels);
+
+    // Deallocate image buffer
+    delete[] pixels;
+
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+
+    // Open image to view
     system("test_image.png");
 
-    std::cout << "\nDone.\n";
+    std::cout << std::endl;
+    std::cout << "Overall Time = " << std::chrono::duration_cast<std::chrono::seconds>(end - begin).count() << "[s]" << std::endl;
+    std::cout << "Done.\n";
 }

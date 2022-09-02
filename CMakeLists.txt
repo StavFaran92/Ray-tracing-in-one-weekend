@@ -26,6 +26,7 @@ add_executable(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} PUBLIC extern/stb)
 target_include_directories(${PROJECT_NAME} PUBLIC extern/glm)
+target_include_directories(${PROJECT_NAME} PUBLIC extern/CTPL)
 
 find_package(Git QUIET)
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
