@@ -1,11 +1,21 @@
 #include "Color.h"
 #include <cmath>
 
+#define CLAMP_COLOR(c) \
+if(c < 0) \
+	c = 0; \
+else if(c > 1) \
+	c = 1;
+#define CLAMP_COLORS(r, g, b) \
+	CLAMP_COLOR(r) \
+	CLAMP_COLOR(g) \
+	CLAMP_COLOR(b) \
+
 void Color::getAsUnsignedChar(unsigned char& r, unsigned char& g, unsigned char& b) const
 {
     r = static_cast<unsigned char>(m_r * 255.999f);
-    g = static_cast<unsigned char>(m_g * 255.999);
-    b = static_cast<unsigned char>(m_b * 255.999);
+    g = static_cast<unsigned char>(m_g * 255.999f);
+    b = static_cast<unsigned char>(m_b * 255.999f);
 }
 
 void Color::applyGammaCorrection(float factor)

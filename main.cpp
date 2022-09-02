@@ -16,10 +16,10 @@
 #include <chrono>
 
 #define CHANNEL_NUM 3
-#define NUM_OF_SAMPLES 20
+#define NUM_OF_SAMPLES 50
 #define MAX_DEPTH 20
-#define IMAGE_WIDTH 200
-#define IMAGE_HEIGHT 150
+#define IMAGE_WIDTH 600
+#define IMAGE_HEIGHT 400
 #define NUM_OF_THREADS 8
 
 double hitSphere(const glm::vec3& center, float radius, const Ray& ray)
@@ -47,8 +47,6 @@ Color rayColor(const Ray& r, const Hittable& world, int depth) {
     // We use 0.001 to avoid "Shadow Acne"
     if (world.hit(r, 0.001, infinity, rec))
     {
-        //glm::vec3 target = rec.point + rec.normal + getUnitSphereRandomVec();
-        //return .5f * rayColor(Ray(rec.point, target - rec.point), world, depth - 1);
         Ray scattered;
         Color attenuation;
         if (rec.material->scatter(r, rec, attenuation, scattered))
@@ -116,13 +114,13 @@ void renderPixel(int x, int y, int imageWidth, int imageHeight, const Camera& ca
     for (int s = 0; s < NUM_OF_SAMPLES; s++)
     {
         auto u = float(x + randomDouble()) / (imageWidth - 1);
-        auto v = (((imageHeight - 1) - float(y)) / (imageHeight - 1)); //Apply flip
+        auto v = (((imageHeight - 1) - float(y + randomDouble())) / (imageHeight - 1)); //Apply flip
         Ray& ray = cam.getRay(u, v);
         auto& color = rayColor(ray, world, MAX_DEPTH);
 
-        blender.add(color);
+        blender.addColor(color);
     }
-    Color& color = blender.get();
+    Color& color = blender.getBlend();
 
     color.applyGammaCorrection(2.0f);
 
@@ -180,7 +178,10 @@ int main() {
     // Render
     for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
         for (int i = 0; i < IMAGE_WIDTH; ++i) {
-            results[j * IMAGE_WIDTH + i] = p.push([&, i, j](int) {renderPixel(i, j, IMAGE_WIDTH, IMAGE_HEIGHT, cam, world, pixels); });
+            results[j * IMAGE_WIDTH + i] = p.push([&, i, j](int) 
+            {
+                renderPixel(i, j, IMAGE_WIDTH, IMAGE_HEIGHT, cam, world, pixels); 
+            });
         }
     }
 

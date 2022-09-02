@@ -7,8 +7,8 @@
 class Blend
 {
 public:
-	void add(Color c);
-	Color get();
+	void addColor(Color c);
+	Color getBlend();
 private:
 	int m_NumOfSamples = 0;
 	float m_r = 0;
