@@ -16,10 +16,10 @@
 #include <chrono>
 
 #define CHANNEL_NUM 3
-#define NUM_OF_SAMPLES 50
+#define NUM_OF_SAMPLES 500
 #define MAX_DEPTH 50
-#define IMAGE_WIDTH 600
-#define IMAGE_HEIGHT 400
+#define IMAGE_WIDTH 1200
+#define IMAGE_HEIGHT 800
 #define NUM_OF_THREADS 8
 
 double hitSphere(const glm::vec3& center, float radius, const Ray& ray)
