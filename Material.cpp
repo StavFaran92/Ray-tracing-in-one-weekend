@@ -5,7 +5,11 @@
 
 bool Lambertian::scatter(const Ray& rayInput, const HitRecord& hitRecord, Color& attenuation, Ray& scatteredRay) const
 {
-	auto scatterDir = hitRecord.normal * .8f + getUnitSphereRandomVec() * .2f;
+	auto scatterDir = hitRecord.normal + getUnitSphereRandomVec();
+
+	if (nearZero(scatterDir))
+		scatterDir = hitRecord.normal;
+
 	scatteredRay = Ray(hitRecord.point, scatterDir);
 	attenuation = m_color;
 

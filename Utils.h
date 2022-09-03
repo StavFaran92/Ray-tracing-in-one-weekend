@@ -34,3 +34,8 @@ inline glm::vec3 getUnitSphereRandomVec()
         
     }
 }
+
+inline bool nearZero(glm::vec3 vec)
+{
+    return glm::length(vec) <= EPSILON;
+}

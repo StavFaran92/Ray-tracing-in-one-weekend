@@ -16,8 +16,8 @@
 #include <chrono>
 
 #define CHANNEL_NUM 3
-#define NUM_OF_SAMPLES 50
-#define MAX_DEPTH 20
+#define NUM_OF_SAMPLES 20
+#define MAX_DEPTH 50
 #define IMAGE_WIDTH 600
 #define IMAGE_HEIGHT 400
 #define NUM_OF_THREADS 8
@@ -39,7 +39,7 @@ double hitSphere(const glm::vec3& center, float radius, const Ray& ray)
 Color rayColor(const Ray& r, const Hittable& world, int depth) {
     if (depth <= 0)
     {
-        return Color(0,0,0);
+        return Color(1.0, 1.0, 1.0);
     }
 
     HitRecord rec;
@@ -51,9 +51,9 @@ Color rayColor(const Ray& r, const Hittable& world, int depth) {
         Color attenuation;
         if (rec.material->scatter(r, rec, attenuation, scattered))
         {
-            return attenuation * rayColor(scattered, world, depth - 1);
+            return attenuation *rayColor(scattered, world, depth - 1);
         }
-        return Color(0, 0, 0);
+        return attenuation;
     }
     glm::vec3 unit_direction = r.direction();
     float t = 0.5f * (unit_direction.y + 1.0);
@@ -95,6 +95,17 @@ HittableList randomScene() {
             }
         }
     }
+    //{
+    //    auto albedo = Color(randomDouble(), randomDouble(), randomDouble()) * Color(randomDouble(), randomDouble(), randomDouble());
+    //    auto sphere_material = std::make_shared<Lambertian>(albedo);
+    //    world.add(std::make_shared<Sphere>(glm::vec3(3, 1, 2), .5, sphere_material));
+    //}
+
+    //{
+    //    auto albedo = Color(randomDouble(), randomDouble(), randomDouble()) * Color(randomDouble(), randomDouble(), randomDouble());
+    //    auto sphere_material = std::make_shared<Lambertian>(albedo);
+    //    world.add(std::make_shared<Sphere>(glm::vec3(5, 1, 2), .5, sphere_material));
+    //}
 
     auto material1 = std::make_shared<Dielectric>(1.5);
     world.add(std::make_shared<Sphere>(glm::vec3(0, 1, 0), 1.0, material1));
@@ -197,7 +208,7 @@ int main() {
     ImageUtils::writeImage("test_image.png", IMAGE_WIDTH, IMAGE_HEIGHT, pixels);
 
     // Deallocate image buffer
-    delete[] pixels;
+    //delete[] pixels;
 
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 
