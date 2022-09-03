@@ -23,4 +23,7 @@ make
 ./ray-tracing-in-one-weekend
 ```
 
+## Final result
+![Final result](https://github.com/StavFaran92/Ray-tracing-in-one-weekend/blob/master/output/finalImage.png)
+
 Enjoy.
