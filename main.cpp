@@ -16,7 +16,7 @@
 #include <chrono>
 
 #define CHANNEL_NUM 3
-#define NUM_OF_SAMPLES 20
+#define NUM_OF_SAMPLES 50
 #define MAX_DEPTH 50
 #define IMAGE_WIDTH 600
 #define IMAGE_HEIGHT 400
@@ -95,17 +95,6 @@ HittableList randomScene() {
             }
         }
     }
-    //{
-    //    auto albedo = Color(randomDouble(), randomDouble(), randomDouble()) * Color(randomDouble(), randomDouble(), randomDouble());
-    //    auto sphere_material = std::make_shared<Lambertian>(albedo);
-    //    world.add(std::make_shared<Sphere>(glm::vec3(3, 1, 2), .5, sphere_material));
-    //}
-
-    //{
-    //    auto albedo = Color(randomDouble(), randomDouble(), randomDouble()) * Color(randomDouble(), randomDouble(), randomDouble());
-    //    auto sphere_material = std::make_shared<Lambertian>(albedo);
-    //    world.add(std::make_shared<Sphere>(glm::vec3(5, 1, 2), .5, sphere_material));
-    //}
 
     auto material1 = std::make_shared<Dielectric>(1.5);
     world.add(std::make_shared<Sphere>(glm::vec3(0, 1, 0), 1.0, material1));
@@ -166,6 +155,19 @@ void renderPixel(int x, int y, int imageWidth, int imageHeight, const Camera& ca
 //    pixels[++index] = g;
 //}
 
+void displayProgress(float currVal, float maxVal, int& prevProgress)
+{
+    int progress = currVal / maxVal * 100;
+    if (progress % 10 == 0)
+    {
+        if (progress != prevProgress)
+        {
+            std::cout << "\r" << progress << "%" << std::flush;
+            prevProgress = progress;
+        }
+    }
+}
+
 int main() {
 
     std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
@@ -186,8 +188,12 @@ int main() {
     ctpl::thread_pool p(NUM_OF_THREADS);
     std::vector<std::future<void>> results(IMAGE_HEIGHT * IMAGE_WIDTH);
 
+    std::cout << "Apply jobs:" << std::endl;
+
     // Render
     for (int j = IMAGE_HEIGHT - 1; j >= 0; --j) {
+        int previousProgress = 0;
+        displayProgress(IMAGE_HEIGHT - j, IMAGE_HEIGHT, previousProgress);
         for (int i = 0; i < IMAGE_WIDTH; ++i) {
             results[j * IMAGE_WIDTH + i] = p.push([&, i, j](int) 
             {
@@ -196,12 +202,13 @@ int main() {
         }
     }
 
+    std::cout << "\nProcess jobs:" << std::endl;
+
     // Sync threads
     for (int j = 0; j < results.size(); ++j) {
         results[j].get();
-        int progress = float(j) / results.size() * 100;
-        if(progress % 10 == 0)
-            std::cout << "\rProgress: " << progress << "%" << std::flush;
+        int previousProgress = 0;
+        displayProgress(j, results.size(), previousProgress);
     }
 
     // Write to image
